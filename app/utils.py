@@ -1,19 +1,24 @@
 import re
 from io import BytesIO
 from typing import Any, Dict, List
+import requests
+import os
 
 import docx2txt
 import streamlit as st
 from embeddings import OpenAIEmbeddings
 from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.chains.question_answering import load_qa_chain
-from langchain.chains.qa_with_sources import load_qa_with_sources_chain
 from langchain.docstore.document import Document
 from langchain.llms import AzureOpenAI
 from langchain.chat_models import AzureChatOpenAI
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import VectorStore
 from langchain.vectorstores.faiss import FAISS
+from langchain.chains import LLMChain
+from langchain.chains.question_answering import load_qa_chain
+from langchain.chains.qa_with_sources import load_qa_with_sources_chain
+from langchain.chains import ConversationalRetrievalChain
+from langchain.chains.conversational_retrieval.prompts import CONDENSE_QUESTION_PROMPT
 from openai.error import AuthenticationError
 from prompts import STUFF_PROMPT, REFINE_PROMPT, REFINE_QUESTION_PROMPT
 from pypdf import PdfReader
@@ -91,7 +96,8 @@ def text_to_docs(text: str | List[str]) -> List[Document]:
 def embed_docs(docs: List[Document], language: str) -> VectorStore:
     """Embeds a list of Documents and returns a FAISS index"""
  
-    # Select the Embedder model
+    # Select the Embedder model'
+    print("Number of chunks:",len(docs))
     if len(docs) < 50:
         # OpenAI models are accurate but slower
         embedder = OpenAIEmbeddings(document_model_name="text-embedding-ada-002", query_model_name="text-embedding-ada-002") 
@@ -103,6 +109,7 @@ def embed_docs(docs: List[Document], language: str) -> VectorStore:
             embedder = HuggingFaceEmbeddings(model_name = 'all-MiniLM-L12-v2')
         else:
             embedder = HuggingFaceEmbeddings(model_name = 'distiluse-base-multilingual-cased-v2')
+
 
     index = FAISS.from_documents(docs, embedder)
 
@@ -187,3 +194,66 @@ def model_tokens_limit(model: str) -> int:
     else:
         token_limit = 3000
     return token_limit
+
+
+
+def get_search_results(query: str, indexes: list) -> list:
+    
+    AZURE_SEARCH_API_VERSION = '2021-04-30-Preview'
+    
+    headers = {'Content-Type': 'application/json','api-key': os.environ["AZURE_SEARCH_KEY"]}
+
+    agg_search_results = []
+    
+    for index in indexes:
+        url = os.environ["AZURE_SEARCH_ENDPOINT"] + '/indexes/'+ index + '/docs'
+        url += '?api-version={}'.format(AZURE_SEARCH_API_VERSION)
+        url += '&search={}'.format(query)
+        url += '&select=*'
+        url += '&$top=5'  # You can change this to anything you need/want
+        url += '&queryLanguage=en-us'
+        url += '&queryType=semantic'
+        url += '&semanticConfiguration=my-semantic-config'
+        url += '&$count=true'
+        url += '&speller=lexicon'
+        url += '&answers=extractive|count-3'
+        url += '&captions=extractive|highlight-false'
+
+        resp = requests.get(url, headers=headers)
+
+        search_results = resp.json()
+        agg_search_results.append(search_results)
+
+    return agg_search_results
+    
+    
+def get_answer_with_memory(
+               query: str, 
+               index: VectorStore,
+               chat_history: list,
+               deployment: str, 
+               chain_type: str, 
+               temperature: float,
+               max_tokens: int
+              ) -> Dict[str, Any]:
+    
+    """Gets an answer to a question from a list of Documents."""
+
+    # Get the answer
+    
+    if (deployment in ["gpt-35-turbo", "gpt-4", "gpt-4-32k"]) :
+        llm = AzureChatOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    else:
+        llm = AzureOpenAI(deployment_name=deployment, temperature=temperature, max_tokens=max_tokens)
+    
+    doc_chain = load_qa_with_sources_chain(llm, chain_type=chain_type)
+    question_generator = LLMChain(llm=llm, prompt=CONDENSE_QUESTION_PROMPT)
+    chain = ConversationalRetrievalChain(
+                        retriever=index.as_retriever(),
+                        question_generator=question_generator,
+                        combine_docs_chain=doc_chain,
+                    )
+    
+    result = chain({"question": query, "chat_history": chat_history})
+
+    return result["answer"]

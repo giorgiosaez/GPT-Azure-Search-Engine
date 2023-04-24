@@ -7,6 +7,19 @@ from langchain.agents import create_pandas_dataframe_agent
 from langchain.agents import create_csv_agent
 
 
+st.set_page_config(page_title="GPT Tabular data Q&A", page_icon="📖", layout="wide")
+# Add custom CSS styles to adjust padding
+st.markdown("""
+        <style>
+               .block-container {
+                    padding-top: 1rem;
+                    padding-bottom: 0rem;
+                }
+        </style>
+        """, unsafe_allow_html=True)
+
+st.header("GPT Tabular data Q&A (preview)")
+
 def sidebar():
     with st.sidebar:
         st.markdown("""
@@ -24,9 +37,6 @@ preffix = 'First set the pandas display options to show all the columns, get the
 suffix = '. ALWAYS before giving the Final Answer, try another method. Then reflect on the answers of the two methods you did and ask yourself if it answers correctly the original question. If you are not sure, try another method. \n If the runs does not give the same result, reflect and try again two more times until you have two runs that have the same result. If you still cannot arrive to a consistent result, say that you are not sure of the answer. But, if you are sure of the correct answer, create a beautiful and thorough response. DO NOT MAKE UP AN ANSWER OR USE PRIOR KNOWLEDGE, ONLY USE THE RESULTS OF THE CALCULATIONS YOU HAVE DONE. ALWAYS, as part of your final answer, explain how you got to the answer on a section that starts with: "\n\nExplanation:\n."'
 
 max_retries = 5
-
-st.set_page_config(page_title="GPT Tabular data Q&A", page_icon="📖", layout="wide")
-st.header("GPT Tabular data Q&A (preview)")
 
 sidebar()
 
