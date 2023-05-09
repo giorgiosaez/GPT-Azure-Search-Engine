@@ -22,10 +22,7 @@ export AZURE_SEARCH_ENDPOINT=<Enter your value>
 export AZURE_SEARCH_KEY=<Enter your value>
 export AZURE_OPENAI_ENDPOINT=<Enter your value>
 export AZURE_OPENAI_API_KEY=<Enter your value>
-<<<<<<< HEAD
 export DATASOURCE_SAS_TOKEN=<Enter your value>
-=======
->>>>>>> e1e3a3643eec37d32b81aa4b9305542f625be58c
 ```
 3. Run the Streamlit server🚀
 ```bash
@@ -54,10 +51,11 @@ Example: https://myComputeInstance-8501.southcentralus.instances.azureml.ms/
 
 ### [Local Git deployment to Azure App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-local-git?tabs=cli)
 
-
 1. In the Azure portal, navigate to your app's management page. 
 2. From the left menu, select Deployment Center > Settings. Select Local Git in Source, then click Save.
+
 ![Shows how to enable local Git deployment for App Service in the Azure portal](https://learn.microsoft.com/en-us/azure/app-service/media/deploy-local-git/enable-portal.png)
+
 3. In the Local Git section, copy the Git Clone Uri for later. This Uri doesn't contain any credentials.
 4. In a local terminal window, change the directory to the root of your Git repository, and add a Git remote using the URL you got from your app. If your chosen method doesn't give you a URL, use https://<app-name>.scm.azurewebsites.net/<app-name>.git with your app name in <app-name>.
 ```bash
@@ -78,24 +76,25 @@ git push azure master```.
 
 ## Troubleshoot
 
-- If WebApp deployed succesfully but the Application didn't start
-1. Go to Azure portal -> Your Webapp -> Settings -> Configuration -> General Settings
-2. Make sure that StartUp Command has:  python -m streamlit run app/Home.py --server.port 8000 --server.address 0.0.0.0
+1. If WebApp deployed succesfully but the Application didn't start
+   1. Go to Azure portal -> Your Webapp -> Settings -> Configuration -> General Settings
+   2. Make sure that StartUp Command has:  python -m streamlit run app/Home.py --server.port 8000 --server.address 0.0.0.0
 
-- If deployment fails with error "Cannot find SourceControlToken with name Github" you can try the following
-1. Wait 20 mins and Retry
-2. Delete the browser cache and retry
-3. Go to the deployed WebApp and Authorize azure to deploy and build code directly from Github 
-
-![Authorize Github](../images/error-authorize-github.jpeg "Authorize Github" )
-
-- If running locally fails with error "TypeError: unsupported operand type(s) for |: 'type' and '_GenericAlias'"
+2. If running locally fails with error "TypeError: unsupported operand type(s) for |: 'type' and '_GenericAlias'"
 Check your list of conda environments and activate one with Python 3.10 or higher
 For example, if you are running the app on an Azure ML compute instance:
-```
-conda env list
-conda activate azureml_py310_sdkv2
-```
+    ```
+    conda env list
+    conda activate azureml_py310_sdkv2
+    ```
+
+3. If deployment fails with error "Cannot find SourceControlToken with name Github" you can try the following
+    1. Wait 20 mins and Retry
+    2. Delete the browser cache and retry
+    3. Go to the deployed WebApp and Authorize azure to deploy and build code directly from Github 
+
+    ![Authorize Github](../images/error-authorize-github.jpeg "Authorize Github" )
+
 
 
 

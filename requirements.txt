@@ -1,6 +1,6 @@
 streamlit
 streamlit-chat
-langchain
+langchain==0.0.153
 faiss-cpu
 openai
 tiktoken
@@ -9,5 +9,7 @@ pillow
 pypdf
 tenacity
 sentence_transformers
-sqlalchemy
+sqlalchemy<2.0.0
 pyodbc
+tabulate
+pandasql
