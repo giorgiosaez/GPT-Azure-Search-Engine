@@ -7,7 +7,7 @@ The goal of the MVP workshop is to show/prove the value of a GPT Smart Search En
 
 For more information on the 3 day workshop, click the powerpoint presentation below:
 
-[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Pitch%20Deck%20Azure%20GPT%20Search%20Engine%20Accelerator.pdf)
+[Accelerator Pitch Deck](https://github.com/pablomarin/GPT-Azure-Search-Engine/blob/main/Intro%20Deck%20-%20AOAI%20GPT%20Search%20Engine%20Accelerator.pdf)
 
 
 **Prerequisites Client 3-Day Workshop**
@@ -43,7 +43,7 @@ For more information on the 3 day workshop, click the powerpoint presentation be
 ---
 ## Demo
 
-https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app
+https://pablomarin-gpt-azure-search-engine-apphome-oq98mn.streamlit.app/
 
 ---
 
